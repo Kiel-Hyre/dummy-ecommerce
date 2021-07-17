@@ -1,9 +1,8 @@
 from django.shortcuts import render
 
-def index(request):
-    return render(request, 'purchase/index.html', {})
+from . import models
 
-def room(request, room_name):
-    return render(request, 'purchase/room.html', {
-        'room_name': room_name
+def index(request):
+    return render(request, 'purchase/index.html', {
+        'items': models.Item.objects.all()
     })

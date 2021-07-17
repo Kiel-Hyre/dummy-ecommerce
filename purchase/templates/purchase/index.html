@@ -1,25 +1,95 @@
 <html>
 <head>
     <meta charset="utf-8"/>
-    <title>This is not a channels pepeLaugh</title>
+    <title>Dummy Purchase</title>
 </head>
 <body>
-    What chat room would you like to enter?<br>
+    <p>Purchase Table</p><br>
+    <table id='table' style="width:100%">
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+        </tr>
+        {% for item in items %}
+        <tr>
+            <td>{{ item.uid }}</td>
+            <td>{{ item.name }}</td>
+        </tr>
+        {% endfor %}
+
+    </table>
+
+    <br>
+    <p>Note: put id in input if you want to delete</p>
+    <input id="purchase-name-input" type="text" size="100">
+    <br><br>
+    <input id="purchase-name-add" type="button" value="Send">
+    <input id="purchase-name-delete" type="button" value="Delete">
+
+   <!--  What chat room would you like to enter?<br>
     <input id="room-name-input" type="text" size="100"><br>
-    <input id="room-name-submit" type="button" value="Enter">
+    <input id="room-name-submit" type="button" value="Enter"> -->
 
     <script>
-        document.querySelector('#room-name-input').focus();
-        document.querySelector('#room-name-input').onkeyup = function(e) {
-            if (e.keyCode === 13) {  // enter, return
-                document.querySelector('#room-name-submit').click();
+
+        const purchaseSocket = new WebSocket(
+            'ws://'+ window.location.host+ '/ws/purchase/');
+
+        purchaseSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            console.log(data);
+
+            var table = document.getElementById('table');
+            if (data.action === 'created'){
+                //document.querySelector('#purchase-log').value += (data.message + '\n');
+                var row = table.insertRow();
+                var cell1 = row.insertCell(0);
+                var cell2 = row.insertCell(1);
+                cell1.innerHTML = data.id;
+                cell2.innerHTML = data.name;
+            }else{
+                var rows = table.rows.length
+                for(let i=0; i<rows; i++){
+                    if (i===0) continue // headers
+                    if (table.rows[i].cells[0].innerHTML === data.id){
+                        console.log('deleted');
+                        table.deleteRow(i);
+                    }
+                }
             }
         };
 
-        document.querySelector('#room-name-submit').onclick = function(e) {
-            var roomName = document.querySelector('#room-name-input').value;
-            window.location.pathname = roomName + '/';
+        purchaseSocket.onclose = function(e) {
+            console.error('Socket closed unexpectedly');
         };
+
+        // add
+        document.querySelector('#purchase-name-add').onclick = function(e) {
+            const nameInputDom = document.querySelector('#purchase-name-input');
+            const name = nameInputDom.value;
+
+            purchaseSocket.send(JSON.stringify({
+                'name': name,
+                'action': 'submit'
+            }));
+
+            nameInputDom.value = '';
+        };
+
+        // delete
+        document.querySelector('#purchase-name-delete').onclick = function(e) {
+            const nameInputDom = document.querySelector('#purchase-name-input');
+            const name = nameInputDom.value;
+            console.log('yep');
+
+            purchaseSocket.send(JSON.stringify({
+                'id': name,
+                'action': 'remove'
+            }));
+
+            nameInputDom.value = '';
+        };
+
     </script>
 </body>
 </html>
