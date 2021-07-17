@@ -5,4 +5,5 @@ Dummy ecommerce. No purpose. Just to try channels
 
 - Django
 - django-channels
+- djangorestframework
 
