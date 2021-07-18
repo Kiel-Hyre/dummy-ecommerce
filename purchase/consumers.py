@@ -23,7 +23,7 @@ class PurchaseConsumer(AsyncWebsocketConsumer):
         self.room_group_name = 'purchase-socket'
 
         # join room-group use for layer
-        await (self.channel_layer.group_add)(
+        await self.channel_layer.group_add(
             self.room_group_name,
             self.channel_name
         )
